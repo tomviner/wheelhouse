@@ -18,6 +18,8 @@ packages = [
 python = "^3.12.0"
 # Everything below here is alphabetically sorted
 pandas = "^2.2.1"
+httpx = "^0.27.0"
+bs4 = "^0.0.2"
 
 [tool.poetry.dev-dependencies]
 # Everything below here is alphabetically sorted
