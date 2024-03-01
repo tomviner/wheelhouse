@@ -9,7 +9,7 @@ from pathlib import Path
 
 import chromadb
 
-ROOT = Path(".")
+ROOT = Path()
 
 chroma_client = chromadb.PersistentClient(str(ROOT / "data" / "interim" / "chromadir"))
 
