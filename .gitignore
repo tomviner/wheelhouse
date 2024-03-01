@@ -4,7 +4,7 @@
 *.pyc
 
 # Data
-./data/
+data/
 !**/data/**/README.md
 !**/data/**/*.gitkeep
 
