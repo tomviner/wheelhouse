@@ -3,11 +3,15 @@
 Usage:
     streamlit run wheelhouse/app.py
 """
+from pathlib import Path
+
+import chromadb
 import streamlit as st
 from joblib import Memory
 from openai import OpenAI
 from streamlit_chat import message
 
+ROOT = Path()
 LOCATION = "./cachedir"
 MEMORY = Memory(LOCATION, verbose=0)
 CLIENT = OpenAI()
@@ -37,7 +41,7 @@ if "context" not in st.session_state:
     Once I have responded to your first question, you may ask a second question.
     Once I have responded to your second question, you may ask a third question.
 
-    You can only ask one question at a time. Please wait for my answer before asking your next question.
+    You can only ask one question at a time. Please wait for my answer before asking your next question. Keep your questions short!
 
     Here's some information about the event.
 
@@ -49,13 +53,48 @@ if "context" not in st.session_state:
     """
     st.session_state["context"] = [{"role": "system", "content": initial_prompt}]
     output = generate_response("You can now ask your first question.")
+    st.session_state["past"] = ["Let's gooooo."]
     st.session_state["generated"] = [output]
+    st.session_state["stage"] = "questions"
 
 if "generated" not in st.session_state:
     st.session_state["generated"] = []
 
 if "past" not in st.session_state:
     st.session_state["past"] = []
+
+if len(st.session_state["past"]) == 4:
+    summary = generate_response(
+        """
+        Please summarise this whole conversation into a concise query (one paragraph max).
+        Don't worry about full english or grammar, this output will be used as a query for RAG into a vector database,
+        so focus on providing salient information, keywords, tags, key phrases
+        """
+    )
+    print(summary)
+    st.session_state["context"] = []
+    st.session_state["generated"] = []
+    st.session_state["past"] = []
+    st.session_state["stage"] = "rag"
+
+    chroma_client = chromadb.PersistentClient(str(ROOT / "data" / "interim" / "chromadir"))
+    collection = chroma_client.get_or_create_collection(name="my_collection")
+
+    results = collection.query(query_texts=[summary], n_results=5)
+    # {
+    #     'ids': [[]],
+    #     'distances': [[]],
+    #     'metadatas': [[]],
+    #     'embeddings': None,
+    #     'documents': [[]],
+    #     'uris': None,
+    #     'data': None
+    # }
+
+    metadatas = results["metadatas"][0]
+    docs = results["documents"][0]
+    for i, (metadata, doc) in enumerate(zip(metadatas, docs)):
+        message(f"{metadata["organisation"]}\n{doc}", key=f"rag-{i}")  # bot
 
 
 # Containers
@@ -77,6 +116,5 @@ with chat_container:
 if st.session_state["generated"]:
     with response_container:
         for i in range(len(st.session_state["generated"])):
+            message(st.session_state["past"][i], is_user=True, key=f"{i}_user")  # user
             message(st.session_state["generated"][i], key=f"{i}")  # bot
-            if len(st.session_state["past"]) > i:
-                message(st.session_state["past"][i - 1], is_user=True, key=f"{i}_user")  # user
