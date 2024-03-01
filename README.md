@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/tomviner/wheelhouse/actions/workflows/main.yaml/badge.svg)](https://github.com/tomviner/wheelhouse/actions/workflows/main.yaml)
 
-Well here's something that's in your Wheelhouse.
+This is in your wheelhouse.
 
 ## Project cheatsheet
 
@@ -24,4 +24,4 @@ Well here's something that's in your Wheelhouse.
 4. See [docs/detect_secrets.md](docs/detect_secrets.md) for more on creating a `.secrets.baseline`
    file using [detect-secrets](https://github.com/Yelp/detect-secrets).
 5. See [docs/using_towncrier.md](docs/using_towncrier.md) for how to update the `CHANGELOG.md`
-   using [towncrier](https://github.com/twisted/towncrier). 
+   using [towncrier](https://github.com/twisted/towncrier).

@@ -34,5 +34,3 @@ tldr gcloud
 ```sh
 python -m ipykernel install --user --name wheelhouse --display-name "Python (wheelhouse)"
 ```
-
-
