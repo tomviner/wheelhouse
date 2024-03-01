@@ -1,3 +1,6 @@
+"""Usage:
+python scrape.py > data/raw/securityandpolicing-exhibitors-2024.json
+"""
 from bs4 import BeautifulSoup
 import json
 import httpx
@@ -15,7 +18,7 @@ exhibitors = []
 for exhibitor in soup.find_all("div", class_="exhibitor"):
     data = {}
     data['organisation'] = exhibitor['data-organisation']
-    data['sectors'] = json.loads(exhibitor['data-sectors'])
+    data['sectors'] = ' | '.join(json.loads(exhibitor['data-sectors']))
     title_element = exhibitor.find("h6")
     if title_element and title_element.a:
         data['title'] = title_element.get_text(strip=True)
@@ -26,10 +29,11 @@ for exhibitor in soup.find_all("div", class_="exhibitor"):
     company_element = exhibitor.find("div", class_="col-md-9")
     if company_element:
         data['company'] = company_element.get_text(strip=True)
-    exhibitors.append(data)
     description_element = exhibitor.find("p")
     if description_element:
         data['description'] = description_element.get_text(strip=True)
+
+    exhibitors.append(data)
 
 if __name__ == '__main__':
     print(json.dumps(exhibitors, indent=2))
