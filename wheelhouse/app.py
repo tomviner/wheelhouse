@@ -7,17 +7,18 @@ from pathlib import Path
 
 import chromadb
 import streamlit as st
-from joblib import Memory
+
+# from joblib import Memory
 from openai import OpenAI
 from streamlit_chat import message
 
 ROOT = Path()
-LOCATION = "./cachedir"
-MEMORY = Memory(LOCATION, verbose=0)
+# LOCATION = "./cachedir"
+# MEMORY = Memory(LOCATION, verbose=0)
 CLIENT = OpenAI()
 
 
-@MEMORY.cache
+# @MEMORY.cache
 def generate_response(prompt, model="gpt-4-turbo-preview"):
     """Prompt GPT API for a chat completion response."""
     st.session_state["context"].append({"role": "user", "content": prompt})
@@ -63,38 +64,35 @@ if "generated" not in st.session_state:
 if "past" not in st.session_state:
     st.session_state["past"] = []
 
-if len(st.session_state["past"]) == 4:
+if len(st.session_state["past"]) == 3:
     summary = generate_response(
         """
         Please summarise this whole conversation into a concise query (one paragraph max).
         Don't worry about full english or grammar, this output will be used as a query for RAG into a vector database,
         so focus on providing salient information, keywords, tags, key phrases
+
+        Start your response with "You are interested in"
         """
     )
-    print(summary)
+    st.session_state["generated"].append(summary)
+    st.session_state["generated"].append(
+        "Here are some companies exhibiting at Security & Policing 2024 that you may be interested in talking to:"
+    )
     st.session_state["context"] = []
-    st.session_state["generated"] = []
-    st.session_state["past"] = []
+    if " ai " in summary.lower():
+        summary = "Coefficient Systems " + summary
+    print(summary)
     st.session_state["stage"] = "rag"
 
     chroma_client = chromadb.PersistentClient(str(ROOT / "data" / "interim" / "chromadir"))
     collection = chroma_client.get_or_create_collection(name="my_collection")
 
     results = collection.query(query_texts=[summary], n_results=5)
-    # {
-    #     'ids': [[]],
-    #     'distances': [[]],
-    #     'metadatas': [[]],
-    #     'embeddings': None,
-    #     'documents': [[]],
-    #     'uris': None,
-    #     'data': None
-    # }
 
     metadatas = results["metadatas"][0]
     docs = results["documents"][0]
-    for i, (metadata, doc) in enumerate(zip(metadatas, docs)):
-        message(f"{metadata["organisation"]}\n{doc}", key=f"rag-{i}")  # bot
+    for metadata, doc in zip(metadatas, docs):
+        st.session_state["generated"].append(f"{metadata["organisation"]}\n{doc}")
 
 
 # Containers
@@ -116,5 +114,6 @@ with chat_container:
 if st.session_state["generated"]:
     with response_container:
         for i in range(len(st.session_state["generated"])):
-            message(st.session_state["past"][i], is_user=True, key=f"{i}_user")  # user
+            if len(st.session_state["past"]) > i:
+                message(st.session_state["past"][i], is_user=True, key=f"{i}_user")  # user
             message(st.session_state["generated"][i], key=f"{i}")  # bot
