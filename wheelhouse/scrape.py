@@ -35,6 +35,11 @@ for exhibitor in soup.find_all("div", class_="exhibitor"):
     description_element = exhibitor.find("p")
     if description_element:
         data["description"] = description_element.get_text(strip=True)
+    logo_element = exhibitor.find("img", class_="img-fluid wp-post-image")
+    if logo_element:
+        data["logo_url"] = logo_element["src"]
+    else:
+        data["logo_url"] = ""
 
     exhibitors.append(data)
 

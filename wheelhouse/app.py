@@ -54,7 +54,9 @@ if "context" not in st.session_state:
     """
     st.session_state["context"] = [{"role": "system", "content": initial_prompt}]
     output = generate_response("You can now ask your first question.")
-    st.session_state["past"] = ["Let's gooooo."]
+    st.session_state["past"] = [
+        "Let's find some exhibitors you'd be interested to meet at Security & Policing 2024!",
+    ]
     st.session_state["generated"] = [output]
     st.session_state["stage"] = "questions"
 
@@ -64,7 +66,7 @@ if "generated" not in st.session_state:
 if "past" not in st.session_state:
     st.session_state["past"] = []
 
-if len(st.session_state["past"]) == 3:
+if len(st.session_state["past"]) == 2:
     summary = generate_response(
         """
         Please summarise this whole conversation into a concise query (one paragraph max).
@@ -92,7 +94,9 @@ if len(st.session_state["past"]) == 3:
     metadatas = results["metadatas"][0]
     docs = results["documents"][0]
     for metadata, doc in zip(metadatas, docs, strict=False):
-        st.session_state["generated"].append(f"{metadata["organisation"]}\n{doc}")
+        st.session_state["generated"].append(
+            f"{metadata["organisation"]} ({metadata['stand']})\n\n{metadata['sectors']}\n\n{doc}"
+        )
 
 
 # Containers
