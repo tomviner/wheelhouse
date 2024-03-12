@@ -9,6 +9,9 @@ data/
 !**/data/**/README.md
 !**/data/**/*.gitkeep
 
+# Demos
+*.mov
+
 # Secrets
 .env
 

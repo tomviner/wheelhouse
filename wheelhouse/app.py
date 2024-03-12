@@ -72,11 +72,11 @@ if len(st.session_state["past"]) == 3:
         so focus on providing salient information, keywords, tags, key phrases
 
         Start your response with "You are interested in"
-        """
+        """,
     )
     st.session_state["generated"].append(summary)
     st.session_state["generated"].append(
-        "Here are some companies exhibiting at Security & Policing 2024 that you may be interested in talking to:"
+        "Here are some companies exhibiting at Security & Policing 2024 that you may be interested in talking to:",
     )
     st.session_state["context"] = []
     if " ai " in summary.lower():
@@ -91,7 +91,7 @@ if len(st.session_state["past"]) == 3:
 
     metadatas = results["metadatas"][0]
     docs = results["documents"][0]
-    for metadata, doc in zip(metadatas, docs):
+    for metadata, doc in zip(metadatas, docs, strict=False):
         st.session_state["generated"].append(f"{metadata["organisation"]}\n{doc}")
 
 
